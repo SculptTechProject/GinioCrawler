@@ -12,3 +12,5 @@ pandas
 openpyxl
 
 black
+
+pyinstaller
