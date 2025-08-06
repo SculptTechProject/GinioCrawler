@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup as BS
 import pandas as pd
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
+from pathlib import Path
 
 EMAIL_RE = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.I)
 PL_PHONE_RE = re.compile(r"(?:\+48\s?)?(?:\d{3}[\s-]?\d{3}[\s-]?\d{3})")
@@ -123,6 +124,10 @@ async def run(query):
 
 if __name__ == "__main__":
     try:
+        import os, sys, csv, asyncio
+        from pathlib import Path
+        from datetime import datetime  # ważne: klasa datetime, nie moduł
+
         q = input("Podaj szukane słowo: ").strip()
         if not q:
             print("Pusta fraza. Kończę.")
@@ -137,23 +142,31 @@ if __name__ == "__main__":
             print("Brak wyników.")
             sys.exit(0)
 
+        # katalogi wyjściowe
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        outfile = f"wyniki_{ts}.csv"
+        csv_dir = Path("wyniki/csv");  csv_dir.mkdir(parents=True, exist_ok=True)
+        xlsx_dir = Path("wyniki/excel"); xlsx_dir.mkdir(parents=True, exist_ok=True)
 
-        # utf-8-sig ułatwia otwieranie w Excelu
-        with open(outfile, "w", newline="", encoding="utf-8-sig") as f:
+        outfile_csv = csv_dir / f"wyniki_{ts}.csv"
+        outfile_xlsx = xlsx_dir / f"wyniki_{ts}.xlsx"
+
+        # CSV (UTF-8-SIG ułatwia otwieranie w Excelu), separator = spacja
+        with open(outfile_csv, "w", newline="", encoding="utf-8-sig") as f:
             w = csv.DictWriter(f, fieldnames=["url","title","emails","phones","contact_url"])
             w.writeheader()
             for row in data:
-                row = {**row, "emails": ";".join(row["emails"]), "phones": ";".join(row["phones"])}
+                row = {
+                    **row,
+                    "emails": " ".join(row.get("emails", [])),
+                    "phones": " ".join(row.get("phones", [])),
+                }
                 w.writerow(row)
 
-        print(f"Zapisano {len(data)} rekordów do {outfile}")
+        print(f"Zapisano {len(data)} rekordów do: {outfile_csv}")
 
-        outfile_xlsx = outfile.replace(".csv", ".xlsx")
-        write_excel(outfile, outfile_xlsx)
+        # XLSX
+        write_excel(str(outfile_csv), str(outfile_xlsx))
         print(f"Zapisano też Excel: {outfile_xlsx}")
-
 
     except KeyboardInterrupt:
         print("\nPrzerwano przez użytkownika.")
