@@ -1,4 +1,3 @@
-# app_gui.py
 import os, csv, asyncio, threading, subprocess, sys
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, simpledialog
