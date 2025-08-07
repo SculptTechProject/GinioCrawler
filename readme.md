@@ -7,7 +7,7 @@ Mała apka do wyszukiwania firm po frazie (np. *“producenci granulatu Polska�
 ## Wymagania
 
 * Python 3.10+ (dev) / Windows 10+ (EXE)
-* Klucz do wyszukiwarki: **SERPAPI\_KEY** (SerpAPI)
+* Klucz do wyszukiwarki: **SERPAPI\_KEY** [SERPAPI LINK](https://serpapi.com)
 * Internet 😅
 
 ## Instalacja (dev)
