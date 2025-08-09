@@ -14,7 +14,8 @@ Small, pragmatic lead-gen helper: type a query → get company contacts → expo
 
 ## DEMO
 
-// TODO: provide sample
+<img width="1177" height="520" alt="image" src="https://github.com/user-attachments/assets/ef1bad28-6b57-4fe2-a276-afb1ba4ebfa1" />
+
 
 ## FEATURES
 
@@ -69,7 +70,8 @@ python main.py
 
 ## OUTPUT SCHEMA (TYPICAL COLUMNS)
 
-// TODO: provide sample
+<img width="2035" height="373" alt="image" src="https://github.com/user-attachments/assets/c40467fb-cbc4-4770-9e83-1f998023fa60" />
+
 
 ## GOOD CITIZEN (ETHICS AND LIMITS)
 
