@@ -10,6 +10,7 @@ from pathlib import Path
 EMAIL_RE = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.I)
 PL_PHONE_RE = re.compile(r"(?:\+48\s?)?(?:\d{3}[\s-]?\d{3}[\s-]?\d{3})")
 
+
 def write_excel(csv_path, xlsx_path):
     df = pd.read_csv(csv_path)
     for col in ("emails", "phones"):
@@ -27,17 +28,20 @@ def write_excel(csv_path, xlsx_path):
         ws = w.sheets["Wyniki"]
 
         # nagłówki, freeze, filtr
-        for c in ws[1]: c.font = Font(bold=True)
+        for c in ws[1]:
+            c.font = Font(bold=True)
         ws.freeze_panes = "A2"
         ws.auto_filter.ref = ws.dimensions
 
         # auto-szerokość (z limitem)
         for col in ws.columns:
             length = max(len(str(c.value)) if c.value else 0 for c in col)
-            ws.column_dimensions[col[0].column_letter].width = min(max(12, int(length*0.9)), 60)
+            ws.column_dimensions[col[0].column_letter].width = min(
+                max(12, int(length * 0.9)), 60
+            )
 
         # hiperlinki
-        cols = [c for c in ("url","contact_url") if c in df.columns]
+        cols = [c for c in ("url", "contact_url") if c in df.columns]
         for row in range(2, ws.max_row + 1):
             for name in cols:
                 idx = df.columns.get_loc(name) + 1
@@ -58,17 +62,22 @@ def in_robots(url: str) -> bool:
     except Exception:
         return True
 
+
 def absolutize(base, href):
     return urllib.parse.urljoin(base, href)
 
+
 async def fetch(url, client):
     try:
-        if not in_robots(url): return None
+        if not in_robots(url):
+            return None
         r = await client.get(url, timeout=15, follow_redirects=True)
-        if r.status_code >= 400: return None
+        if r.status_code >= 400:
+            return None
         return r.text
     except Exception:
         return None
+
 
 def parse_info(html, url):
     soup = BS(html, "html.parser")
@@ -79,14 +88,22 @@ def parse_info(html, url):
     contact = None
     for a in soup.select("a"):
         t = (a.get_text() or "").strip().lower()
-        if t in ("kontakt","contact") or "kontakt" in t or "contact" in t:
-            contact = absolutize(url, a.get("href",""))
+        if t in ("kontakt", "contact") or "kontakt" in t or "contact" in t:
+            contact = absolutize(url, a.get("href", ""))
             break
-    return {"url": url, "title": title, "emails": emails, "phones": phones, "contact_url": contact}
+    return {
+        "url": url,
+        "title": title,
+        "emails": emails,
+        "phones": phones,
+        "contact_url": contact,
+    }
+
 
 async def crawl_one(url, client):
     html = await fetch(url, client)
-    if not html: return None
+    if not html:
+        return None
     base_info = parse_info(html, url)
     if base_info["contact_url"]:
         html2 = await fetch(base_info["contact_url"], client)
@@ -96,6 +113,7 @@ async def crawl_one(url, client):
             base_info["phones"] = list(set(base_info["phones"] + extra["phones"]))
     return base_info
 
+
 async def search_serpapi(query, num=20):
     # wymaga SERPAPI_KEY w env
     key = os.environ["SERPAPI_KEY"]
@@ -104,23 +122,29 @@ async def search_serpapi(query, num=20):
         r = await client.get("https://serpapi.com/search", params=params, timeout=20)
         data = r.json()
         urls = []
-        for item in (data.get("organic_results") or []):
+        for item in data.get("organic_results") or []:
             link = item.get("link")
-            if link: urls.append(link)
+            if link:
+                urls.append(link)
         return urls
+
 
 async def run(query):
     urls = await search_serpapi(query, num=25)
-    async with httpx.AsyncClient(headers={"User-Agent":"Mozilla/5.0"}) as client:
+    async with httpx.AsyncClient(headers={"User-Agent": "Mozilla/5.0"}) as client:
         tasks = [crawl_one(u, client) for u in urls]
         results = [r for r in await asyncio.gather(*tasks) if r]
     # deduplikacja po emailach/URL
-    seen = set(); uniq = []
+    seen = set()
+    uniq = []
     for r in results:
         key = (tuple(sorted(r["emails"])), r["url"])
-        if key in seen: continue
-        seen.add(key); uniq.append(r)
+        if key in seen:
+            continue
+        seen.add(key)
+        uniq.append(r)
     return uniq
+
 
 if __name__ == "__main__":
     try:
@@ -134,7 +158,9 @@ if __name__ == "__main__":
             sys.exit(1)
 
         if "SERPAPI_KEY" not in os.environ:
-            print("Brak SERPAPI_KEY w zmiennych środowiskowych. Ustaw i spróbuj ponownie.")
+            print(
+                "Brak SERPAPI_KEY w zmiennych środowiskowych. Ustaw i spróbuj ponownie."
+            )
             sys.exit(2)
 
         data = asyncio.run(run(q))
@@ -144,15 +170,19 @@ if __name__ == "__main__":
 
         # katalogi wyjściowe
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        csv_dir = Path("wyniki/csv");  csv_dir.mkdir(parents=True, exist_ok=True)
-        xlsx_dir = Path("wyniki/excel"); xlsx_dir.mkdir(parents=True, exist_ok=True)
+        csv_dir = Path("wyniki/csv")
+        csv_dir.mkdir(parents=True, exist_ok=True)
+        xlsx_dir = Path("wyniki/excel")
+        xlsx_dir.mkdir(parents=True, exist_ok=True)
 
         outfile_csv = csv_dir / f"wyniki_{ts}.csv"
         outfile_xlsx = xlsx_dir / f"wyniki_{ts}.xlsx"
 
         # CSV (UTF-8-SIG ułatwia otwieranie w Excelu), separator = spacja
         with open(outfile_csv, "w", newline="", encoding="utf-8-sig") as f:
-            w = csv.DictWriter(f, fieldnames=["url","title","emails","phones","contact_url"])
+            w = csv.DictWriter(
+                f, fieldnames=["url", "title", "emails", "phones", "contact_url"]
+            )
             w.writeheader()
             for row in data:
                 row = {
@@ -170,4 +200,3 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         print("\nPrzerwano przez użytkownika.")
-
