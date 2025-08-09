@@ -1,97 +1,154 @@
-# GinioCrawler — dokumentacja
+# GinioCrawler
 
-## O co chodzi?
+## DESCRIPTION
 
-Mała apka do wyszukiwania firm po frazie (np. *“producenci granulatu Polska”*), pobierania stron i wyciągania kontaktów (emaile, telefony). Zapisuje wyniki do **CSV** i **XLSX**.
+Small, pragmatic lead-gen helper: type a query → get company contacts → export to Excel/CSV. Built to help small businesses assemble contact lists without manual copy-paste.
 
-## Wymagania
+– Uses SerpAPI (Google results)
 
-* Python 3.10+ (dev) / Windows 10+ (EXE)
-* Klucz do wyszukiwarki: **SERPAPI\_KEY** [SERPAPI LINK](https://serpapi.com)
-* Internet 😅
+– Extracts emails and phone numbers from target pages
 
-## Instalacja (dev)
+– Exports to .xlsx and .csv
+
+– If SERPAPI\_KEY is missing, the app will prompt for it on first run
+
+## DEMO
+
+// TODO: provide sample
+
+## FEATURES
+
+– Targeted search via SerpAPI (country/language aware)
+
+– Email and phone extraction from result pages
+
+– Clean Excel/CSV export with consistent columns
+
+– Simple GUI flow (and basic CLI)
+
+– Safety knobs: polite delays and rate limits
+
+## ARCHITECTURE (HIGH LEVEL)
+
+**Query → SerpAPI (Google) → result URLs → fetch and parse → extract contacts → dedupe → export (xlsx/csv)**
+
+REQUIREMENTS
+
+– Python 3.9+
+
+– SerpAPI account (free tier works): [CLICK](https://serpapi.com)
+
+*Note: no manual env setup required; the app will ask for the key if it’s missing.*
+
+## **QUICKSTART — GUI**
 
 ```bash
-python -m venv .venv
-# Win PowerShell:
-.venv\Scripts\Activate.ps1
-# macOS/Linux:
-# source .venv/bin/activate
-
+#1. 
+git clone https://github.com/SculptTechProject/GinioCrawler.git
+# 2. 
+cd GinioCrawler
+# 3. 
 pip install -r requirements.txt
-# jeśli używasz GUI i zapisu klucza:
-pip install python-dotenv pandas openpyxl
-```
-
-## Konfiguracja klucza SERPAPI
-
-Masz dwie drogi:
-
-1. **Zmienna środowiskowa**
-   Windows (PowerShell):
-
-   ```powershell
-   setx SERPAPI_KEY "TWÓJ_KLUCZ"
-   ```
-
-   Potem zrestartuj terminal/aplikację.
-2. **GUI zapisze klucz samo** (jeśli masz `ensure_api_key()`):
-   Przy pierwszym uruchomieniu **app\_gui.py** / EXE wyskoczy okno → wklejasz klucz → zapisze się do
-   `%APPDATA%\GinioCrawler\.env`.
-
-## Uruchomienie — konsola (CLI)
-
-```bash
-python main.py
-# wpisz frazę, np. "SoftwareHouse Warszawa"
-```
-
-Wyniki lecą do:
-
-* `wyniki/csv/wyniki_YYYYMMDD_HHMMSS.csv`
-* `wyniki/excel/wyniki_YYYYMMDD_HHMMSS.xlsx`
-
-Kolumny: `url, title, emails, phones, contact_url`.
-W `emails` i `phones` wartości są rozdzielone **spacją**.
-
-## Uruchomienie — GUI
-
-```bash
+# 4. Run your entry script, for example:
 python app_gui.py
+ # If SERPAPI_KEY is not set, the app will prompt for it and continue.
 ```
 
-* Wpisz frazę.
-* (Opcjonalnie) kliknij **Wybierz…** i wskaż folder wyjściowy (w środku stworzy `csv/` i `excel/`).
-* Kliknij **Start**. Po zakończeniu otworzy folder z Excellem.
+## QUICKSTART — CLI
 
-## Budowanie EXE (Windows)
+```bash
+#1. 
+git clone https://github.com/SculptTechProject/GinioCrawler.git
+# 2. 
+cd GinioCrawler
+# 3. 
+pip install -r requirements.txt
+# 4. Please make sure you provided SERPAPI_KEY, then:
+python main.py
+```
+
+## OUTPUT SCHEMA (TYPICAL COLUMNS)
+
+// TODO: provide sample
+
+## GOOD CITIZEN (ETHICS AND LIMITS)
+
+– Respect websites’ robots.txt and Terms of Service
+
+– Keep reasonable rate limits; do not hammer the same domain
+
+– SerpAPI has quotas; heavy usage may require a paid plan
+
+– Use responsibly; this tool is for legitimate contact discovery (no spam)
+
+## TROUBLESHOOTING
+
+– Empty results: make the query more specific; check SerpAPI quota; set proper country/lang
+
+– Slow or blocked: increase delays, lower concurrency, fetch fewer pages
+
+– Excel won’t open: try CSV, or ensure .xlsx is written with a supported library
+
+– Key prompt loops: verify your SerpAPI key and remaining credits
+
+## PACKAGING (DISTRIBUTABLES)
+
+**Windows (.exe):**
 
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --windowed --name "GinioCrawler" app_gui.py
-# opcjonalnie: --icon icon.ico
+
+pyinstaller –onefile –name GinioCrawler app.py
+
+Output: dist/GinioCrawler.exe
 ```
 
-Plik znajdziesz w `dist/GinioCrawler.exe`. Zrób skrót na pulpit.
+**macOS (.app / .dmg):**
 
-## Jak to działa (skrót techniczny)
+```bash
+pip install pyinstaller
 
-* **SerpAPI** zwraca listę URL-i dla frazy.
-* **httpx + BeautifulSoup** pobiera stronę, szuka maili/telefonów i linku **Kontakt** (głębia 1).
-* Szanuje `robots.txt`.
-* Zapis: **CSV (UTF-8-SIG)** + **XLSX** (auto-szerokości, nagłówki, hiperlinki).
-* Separator wielu maili/telefonów: **spacja**.
+pyinstaller –windowed –name GinioCrawler app.py
 
-## Częste problemy
+hdiutil create -volname GinioCrawler -srcfolder dist/GinioCrawler.app -ov -format UDZO dist/GinioCrawler.dmg
+```
 
-* **„Brak SERPAPI\_KEY”** – ustaw zmienną środowiskową albo użyj GUI z zapisem do `.env`.
-* **„ModuleNotFoundError: pandas/openpyxl”** – `pip install pandas openpyxl`.
-* **Puste wyniki** – fraza zbyt ogólna / strony blokują boty / brak kontaktu na [www](http://www/).
-* **Excel zlepia numery** – w XLSX kolumna „phones” jest tekstem; jeśli nie, włącz format „Tekst”.
+*Note: unsigned app; users can open via Right-click → Open. (Signing/notarization can be added later in CI.)*
 
-## Dobre praktyki / etyka
+## TESTS (WHAT TO COVER + QUICK START)
 
-* Szanuj **`robots.txt`** i limity serwisów.
-* Nie bombarduj równoległymi żądaniami (możesz dodać `httpx.Limits` i `asyncio.Semaphore`).
-* Sprawdzaj regulaminy serwisów; używaj oficjalnych API wyszukiwarek.
+Install and run:
+
+pip install pytest
+
+pytest -q
+
+Recommended coverage:
+
+– search/SerpAPI: correct request, pagination, error handling and rate/limit behavior
+
+– fetch: retries with backoff, timeouts, robots.txt respected
+
+– extract: email/phone patterns (various formats), duplicates handling, URL normalization
+
+– export: column order and names, files openable in Excel and CSV
+
+– CLI/UX: missing SERPAPI\_KEY triggers prompt; flag parsing; happy path without real network calls (mocked)
+
+## ROADMAP (SUGGESTED)
+
+– Saved queries and recent exports
+
+– De-duplication across sessions
+
+– Fallback engines and smarter retry strategy
+
+– Better parsing and validation for contacts
+
+– Dockerfile for one-command runs
+
+## LICENSE
+
+MIT 👀️
+
+
