@@ -1,7 +1,9 @@
-from src.main import parse_info, absolutize
+from src.main import absolutize, parse_info
+
 
 def test_absolutize():
     assert absolutize("https://ex.com/dir/", "../a") == "https://ex.com/a"
+
 
 def test_parse_info_extracts_contact():
     html = """

@@ -1,11 +1,18 @@
+import asyncio
 import csv
+import os
+import re
+import sys
+import urllib.parse
+import urllib.robotparser as rp
 from datetime import datetime
-import os, sys, re, asyncio, httpx, urllib.parse, urllib.robotparser as rp
-from bs4 import BeautifulSoup as BS
-import pandas as pd
-from openpyxl.styles import Font, Alignment
-from openpyxl.utils import get_column_letter
 from pathlib import Path
+
+import httpx
+import pandas as pd
+from bs4 import BeautifulSoup as BS
+from openpyxl.styles import Alignment, Font
+from openpyxl.utils import get_column_letter
 
 EMAIL_RE = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.I)
 PL_PHONE_RE = re.compile(r"(?:\+48\s?)?(?:\d{3}[\s-]?\d{3}[\s-]?\d{3})")
@@ -35,7 +42,9 @@ def write_excel(csv_path, xlsx_path):
         ws.auto_filter.ref = ws.dimensions
         for col in ws.columns:
             length = max(len(str(c.value)) if c.value else 0 for c in col)
-            ws.column_dimensions[col[0].column_letter].width = min(max(12, int(length * 0.9)), 60)
+            ws.column_dimensions[col[0].column_letter].width = min(
+                max(12, int(length * 0.9)), 60
+            )
         cols = [c for c in ("url", "contact_url") if c in df.columns]
         for row in range(2, ws.max_row + 1):
             for name in cols:
@@ -45,7 +54,6 @@ def write_excel(csv_path, xlsx_path):
                     cell = ws.cell(row, idx)
                     cell.hyperlink = val
                     cell.style = "Hyperlink"
-
 
 
 def in_robots(url: str) -> bool:
@@ -144,9 +152,12 @@ async def run(query):
 
 if __name__ == "__main__":
     try:
-        import os, sys, csv, asyncio
-        from pathlib import Path
+        import asyncio
+        import csv
+        import os
+        import sys
         from datetime import datetime
+        from pathlib import Path
 
         q = input("Podaj szukane słowo: ").strip()
         if not q:
