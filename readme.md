@@ -1,5 +1,7 @@
 # GinioCrawler
 
+![Release](https://img.shields.io/github/v/release/SculptTechProject/GinioCrawler?include_prereleases&label=release)
+
 ## DESCRIPTION
 
 Small, pragmatic lead-gen helper: type a query → get company contacts → export to Excel/CSV. Built to help small businesses assemble contact lists without manual copy-paste.
