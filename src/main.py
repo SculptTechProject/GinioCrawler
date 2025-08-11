@@ -12,12 +12,15 @@ PL_PHONE_RE = re.compile(r"(?:\+48\s?)?(?:\d{3}[\s-]?\d{3}[\s-]?\d{3})")
 
 
 def write_excel(csv_path, xlsx_path):
-    df = pd.read_csv(csv_path)
+    import pandas as pd
+    from openpyxl.styles import Font
+
+    df = pd.read_csv(csv_path, dtype=str, keep_default_na=False)
+
     for col in ("emails", "phones"):
         if col in df.columns:
             df[col] = (
                 df[col]
-                .fillna("")
                 .str.replace(";", " ")
                 .str.replace(r"\s+", " ", regex=True)
                 .str.strip()
@@ -26,21 +29,13 @@ def write_excel(csv_path, xlsx_path):
     with pd.ExcelWriter(xlsx_path, engine="openpyxl") as w:
         df.to_excel(w, index=False, sheet_name="Wyniki")
         ws = w.sheets["Wyniki"]
-
-        # nagłówki, freeze, filtr
         for c in ws[1]:
             c.font = Font(bold=True)
         ws.freeze_panes = "A2"
         ws.auto_filter.ref = ws.dimensions
-
-        # auto-szerokość (z limitem)
         for col in ws.columns:
             length = max(len(str(c.value)) if c.value else 0 for c in col)
-            ws.column_dimensions[col[0].column_letter].width = min(
-                max(12, int(length * 0.9)), 60
-            )
-
-        # hiperlinki
+            ws.column_dimensions[col[0].column_letter].width = min(max(12, int(length * 0.9)), 60)
         cols = [c for c in ("url", "contact_url") if c in df.columns]
         for row in range(2, ws.max_row + 1):
             for name in cols:
@@ -50,6 +45,7 @@ def write_excel(csv_path, xlsx_path):
                     cell = ws.cell(row, idx)
                     cell.hyperlink = val
                     cell.style = "Hyperlink"
+
 
 
 def in_robots(url: str) -> bool:

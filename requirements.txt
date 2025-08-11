@@ -27,3 +27,15 @@ dirty-equals
 pytest-cov
 
 pytest
+
+anyio
+
+pytest-asyncio
+
+pytest-tornasync
+
+pytest-trio
+
+pytest-twisted
+
+twisted
