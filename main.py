@@ -150,7 +150,7 @@ if __name__ == "__main__":
     try:
         import os, sys, csv, asyncio
         from pathlib import Path
-        from datetime import datetime  # ważne: klasa datetime, nie moduł
+        from datetime import datetime
 
         q = input("Podaj szukane słowo: ").strip()
         if not q:

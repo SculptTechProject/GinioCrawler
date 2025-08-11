@@ -1,0 +1,50 @@
+---
+name: CI
+on: [push, pull_request]
+
+permissions:
+  contents: write
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Install system GUI deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk xvfb
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install isort
+
+      - name: Auto-format (black + isort)
+        run: |
+          isort .
+          black .
+
+      - name: Auto-commit formatted files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "ci(fmt): black+isort [skip ci]"
+          file_pattern: "**/*.py"
+
+      - name: Run tests (headless Tk)
+        env:
+          SERPAPI_KEY: "test-key"
+        run: xvfb-run -a pytest -q -m "not slow"

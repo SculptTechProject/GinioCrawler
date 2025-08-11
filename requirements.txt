@@ -24,4 +24,6 @@ freezegun
 
 dirty-equals
 
-pytest-cov   
+pytest-cov
+
+pytest

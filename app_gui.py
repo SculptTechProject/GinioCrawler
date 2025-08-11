@@ -135,31 +135,23 @@ def choose_dir():
 
 
 # --- UI ---
-root = tk.Tk()
-root.title("GinioCrawler")
-root.geometry("560x220")
+def build_ui():
+    global root, entry_query, btn_start, prog, status, out_dir_var
+    root = tk.Tk()
+    root.title("GinioCrawler")
+    root.geometry("560x220")
+    tk.Label(root, text="Fraza do wyszukania:").pack(anchor="w", padx=12, pady=(12, 0))
+    entry_query = tk.Entry(root); entry_query.pack(fill="x", padx=12, pady=6); entry_query.focus()
+    frm = tk.Frame(root); frm.pack(fill="x", padx=12, pady=(0, 6))
+    tk.Label(frm, text="Folder wyjściowy:").pack(side="left")
+    out_dir_var = tk.StringVar(value=str((Path.cwd() / "wyniki")))
+    entry_dir = tk.Entry(frm, textvariable=out_dir_var); entry_dir.pack(side="left", fill="x", expand=True, padx=(8, 6))
+    tk.Button(frm, text="Wybierz…", command=choose_dir).pack(side="left")
+    btn_start = tk.Button(root, text="Start", command=start); btn_start.pack(padx=12, pady=6)
+    prog = ttk.Progressbar(root, mode="indeterminate"); prog.pack(fill="x", padx=12, pady=(4, 8))
+    status = tk.StringVar(value="Gotowy"); tk.Label(root, textvariable=status, anchor="w").pack(fill="x", padx=12, pady=(0, 8))
+    return root
 
-# fraza
-tk.Label(root, text="Fraza do wyszukania:").pack(anchor="w", padx=12, pady=(12, 0))
-entry_query = tk.Entry(root)
-entry_query.pack(fill="x", padx=12, pady=6)
-entry_query.focus()
-
-# folder wyjściowy
-frm = tk.Frame(root)
-frm.pack(fill="x", padx=12, pady=(0, 6))
-tk.Label(frm, text="Folder wyjściowy:").pack(side="left")
-out_dir_var = tk.StringVar(value=str((Path.cwd() / "wyniki")))
-entry_dir = tk.Entry(frm, textvariable=out_dir_var)
-entry_dir.pack(side="left", fill="x", expand=True, padx=(8, 6))
-tk.Button(frm, text="Wybierz…", command=choose_dir).pack(side="left")
-
-# start + status
-btn_start = tk.Button(root, text="Start", command=start)
-btn_start.pack(padx=12, pady=6)
-prog = ttk.Progressbar(root, mode="indeterminate")
-prog.pack(fill="x", padx=12, pady=(4, 8))
-status = tk.StringVar(value="Gotowy")
-tk.Label(root, textvariable=status, anchor="w").pack(fill="x", padx=12, pady=(0, 8))
-
-root.mainloop()
+if __name__ == "__main__":
+    build_ui()
+    root.mainloop()
