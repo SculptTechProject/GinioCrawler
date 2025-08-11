@@ -1,14 +1,26 @@
+<<<<<<< HEAD
 import httpx, pytest, respx
 from src.main import fetch
+=======
+import httpx
+import pytest
+import respx
+
+from main import fetch
+>>>>>>> e772c4167010570baed9b34907b8a8834fe77e81
+
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_fetch_ok(monkeypatch):
     monkeypatch.setattr("ginio.in_robots", lambda url: True)
-    respx.get("https://x.test/ok").mock(return_value=httpx.Response(200, text="<h1>ok</h1>"))
+    respx.get("https://x.test/ok").mock(
+        return_value=httpx.Response(200, text="<h1>ok</h1>")
+    )
     async with httpx.AsyncClient() as client:
         html = await fetch("https://x.test/ok", client)
     assert "ok" in html
+
 
 @pytest.mark.asyncio
 @respx.mock

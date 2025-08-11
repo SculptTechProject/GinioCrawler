@@ -1,5 +1,7 @@
-import sys, pandas as pd
-from openpyxl.styles import Font, Alignment
+import sys
+
+import pandas as pd
+from openpyxl.styles import Alignment, Font
 from openpyxl.utils import get_column_letter
 
 
