@@ -8,7 +8,7 @@ jobs:
   lint-test:
     runs-on: ubuntu-24.04
     env:
-      PYTHONPATH: ${{ github.workspace }}/src
+      PYTHONPATH: ${{ github.workspace }}
       SERPAPI_KEY: "test-key"
 
     steps:

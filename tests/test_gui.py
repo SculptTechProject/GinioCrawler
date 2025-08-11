@@ -33,4 +33,8 @@ def test_start_calls_run_without_threading(monkeypatch):
         g.start()
         assert g.btn_start["state"] == "normal"
         assert "OK — zapisano" in g.status.get()
+        try:
+            g.root.destroy()
+        except Exception:
+            pass
 
