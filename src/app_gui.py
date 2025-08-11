@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv, set_key
 
-from main import run, write_excel
+from src.main import run, write_excel
 
 
 def ensure_api_key():

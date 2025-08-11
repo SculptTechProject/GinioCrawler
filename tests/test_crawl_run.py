@@ -1,5 +1,5 @@
 import httpx, pytest, respx
-from main import crawl_one, run
+from src.main import crawl_one, run
 
 @pytest.mark.asyncio
 @respx.mock

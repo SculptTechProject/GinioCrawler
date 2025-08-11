@@ -1,5 +1,5 @@
 import httpx, pytest, respx
-from main import fetch
+from src.main import fetch
 
 @pytest.mark.asyncio
 @respx.mock

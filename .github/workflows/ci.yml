@@ -1,4 +1,3 @@
----
 name: CI
 on: [push, pull_request]
 
@@ -8,6 +7,9 @@ permissions:
 jobs:
   lint-test:
     runs-on: ubuntu-24.04
+    env:
+      PYTHONPATH: ${{ github.workspace }}/src
+      SERPAPI_KEY: "test-key"
 
     steps:
       - uses: actions/checkout@v4
@@ -21,8 +23,10 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-      - name: Install system GUI deps
+      - name: Install system GUI deps (Tk + Xvfb)
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-tk xvfb
@@ -45,6 +49,4 @@ jobs:
           file_pattern: "**/*.py"
 
       - name: Run tests (headless Tk)
-        env:
-          SERPAPI_KEY: "test-key"
-        run: xvfb-run -a pytest -q -m "not slow"
+        run: xvfb-run -a python -m pytest -q -m "not slow"

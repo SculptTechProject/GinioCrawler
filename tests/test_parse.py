@@ -1,4 +1,4 @@
-from main import parse_info, absolutize
+from src.main import parse_info, absolutize
 
 def test_absolutize():
     assert absolutize("https://ex.com/dir/", "../a") == "https://ex.com/a"
