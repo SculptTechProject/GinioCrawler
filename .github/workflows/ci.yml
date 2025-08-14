@@ -43,7 +43,7 @@ jobs:
           black .
 
       - name: Auto-commit formatted files
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: "ci(fmt): black+isort [skip ci]"
           file_pattern: "**/*.py"
